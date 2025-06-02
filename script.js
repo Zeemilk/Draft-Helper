@@ -163,7 +163,7 @@ filterButtons.forEach(button => {
             const matchLane = selectedLanes.size === 0 || [...selectedLanes].every(l =>
             h.Lane && h.Lane.toLowerCase().includes(l.toLowerCase())
         );
-        const matchType = selectedTypes.size === 0 || [...selectedTypes].some(t => {
+        const matchType = selectedTypes.size === 0 || [...selectedTypes].every(t => {
             switch (t) {
                 case 'Early': return h.time_raw && (h.time_raw.includes("early"));
                 case 'Late': return h.time_raw && h.time_raw.includes("late");
@@ -329,7 +329,7 @@ filterButtons.forEach(button => {
         h.Lane && h.Lane.toLowerCase().includes(l.toLowerCase())
       );
         // Type filter
-        const matchType = selectedTypes.size === 0 || [...selectedTypes].some(t => {
+        const matchType = selectedTypes.size === 0 || [...selectedTypes].every(t => {
         switch (t) {
             case 'Early': return h.time_raw && (h.time_raw.includes("early"));
             case 'Late': return h.time_raw && h.time_raw.includes("late");
