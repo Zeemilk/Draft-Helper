@@ -1,5 +1,5 @@
 ﻿,Hero,Lane,Damage Type,Time,Damage,Dulability,CC,Mobility,Tier,Ability,Weakness,หมายเหตุ
-1,Airi,DarkSlayer,True Damage,Mid/Late,5,1,2,2,A,Blood/CCResist/Dash/Shield/Stun,,Damage เต็ม 5
+1,Airi,DarkSlayer,True Damage,Mid/Late,5,1,2,2,A,Blood/CCResist/Dash/Shield/Stun,Soul_Scroll,Damage เต็ม 5
 2,Aleister,Mid,Magic Damage,All,3,1,2,0,B,HardLock/Stun/Wave,,Dulability เต็ม 4
 3,Alice,Mid/Support,Magic Damage,Late,4,1,3,1,A,Burst/Shield/Slow/Speed/Stun/Wave,,CC เต็ม 3
 4,Allain,DarkSlayer,Physical Damage,Late,3,2,0,1,B,Blood/CCResist/Dash/Immortal,,Mobility เต็ม 3
@@ -29,7 +29,7 @@
 28,Dextra,Jungle/DarkSlayer,Physical Damage,Late,3,1,0,0,B,Blood/Hook/Speed/Steal,,Steal = ขโมยพลังโจมตี
 29,Diaochan,Mid,Magic Damage,All,4,1,2,0,B,Slow/Stun/Wave,,Stun = สตั๊น
 30,Dirak,Mid,Magic Damage,All,4,2,2,0,A,Barrier/Range/Slow/Stun/Wave,,Wave = เคลียร์เวฟ
-31,Dolia,Support,Magic Damage,All,2,2,1,1,S,Dash/Heal/Push,,
+31,Dolia,Support,Magic Damage,All,2,2,1,1,S,Dash/Heal/Push,,Soul_Scroll = ตัดเลือด
 32,Eland'orr,Jungle/Abyssal,Physical Damage,Early/Mid,4,1,1,3,S,Dash/Push,,
 33,Elsu,Mid/Abyssal,Physical Damage,All,4,1,0,1,A,Burst/Dash/Range,,
 34,Enzo,Support,Physical Damage,All,2,3,3,1,S,Hook/Speed/Stun,,

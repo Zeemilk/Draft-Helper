@@ -25,13 +25,13 @@ function createGameContent(index) {
             <div class="hero-choose" id="Jungle1"><img src="/assest/etc/Jungle.webp" data-default="/assest/etc/Jungle.webp"></div>
             <div class="hero-choose" id="DarkSlayer1"><img src="/assest/etc/DarkSlayer.webp" data-default="/assest/etc/DarkSlayer.webp"></div>
             </div>
-            <div class="ban">
+            <div class="ban1">
                 <div class="ban-choose" id="Ban1"></div>
                 <div class="ban-choose" id="Ban1"></div>
                 <div class="ban-choose" id="Ban1"></div>
                 <div class="ban-choose" id="Ban1"></div>
             </div>
-            <div class="ban">
+            <div class="ban2">
                 <div class="ban-choose" id="Ban2"></div>
                 <div class="ban-choose" id="Ban2"></div>
                 <div class="ban-choose" id="Ban2"></div>
@@ -47,12 +47,6 @@ function createGameContent(index) {
         </div>
         <div class="content" id="content-${index}">
             <div class="display ">
-                <p id="ban-list-1-${index}" class="ban-list">Team 1 Ban: </p>
-                <p id="ban-list-2-${index}" class="ban-list">Team 2 Ban: </p>
-                <p id="cc-display-${index}" class="ban-list"></p>
-                <p id="dmgtype-display-${index}" class="ban-list"></p>
-                <p id="damage-display-${index}" class="ban-list"></p>
-                <p id="dura-display-${index}" class="ban-list"></p>
             </div>
         <div class="hero-select">
             <div id="lane-filter" style="margin-bottom: 10px;">
@@ -88,7 +82,8 @@ function bindEventsToGame(index) {
     const gameWrapper = document.querySelector(`.game[data-index="${index}"]`);
     const gallery = gameWrapper.querySelector("#hero-gallery");
     const chooseBoxes = gameWrapper.querySelectorAll(".hero-choose");
-    const banBoxes = document.querySelectorAll(`#ban-pick-${index} .ban-choose`);
+    const banBoxes1 = gameWrapper.querySelectorAll(`.ban1 .ban-choose`);
+    const banBoxes2 = gameWrapper.querySelectorAll(`.ban2 .ban-choose`);
     const filterButtons = gameWrapper.querySelectorAll('#lane-filter button');
   // hero-choose
     chooseBoxes.forEach(box => {
@@ -116,12 +111,12 @@ function bindEventsToGame(index) {
         });
 });
 // ban-choose
-banBoxes.forEach(box => {
+[...banBoxes1, ...banBoxes2].forEach(box => {
     box.addEventListener("click", () => {
         const imgInBox = box.querySelector("img");
         if (imgInBox) {
             const heroName = imgInBox.alt;
-            const galleryImg = Array.from(gallery.children).find(img => img.alt === heroName);
+            const galleryImg = Array.from(gallery.querySelectorAll("img")).find(img => img.alt === heroName);
             if (galleryImg) galleryImg.style.display = "inline-block";
             box.innerHTML = "";
             updateBanList(); 
@@ -205,6 +200,10 @@ tabAdd.addEventListener('click', () => {
     console.log("Hero Team 2:", heroteam2);
     if (gameData.length >= MAX_GAMES) return;
     const index = gameData.length;
+    if (index === 6) { // เกมที่ 7 (index เริ่มจาก 0)
+        heroteam1 = [];
+        heroteam2 = [];
+    }
     gameData.push({ team1: [], team2: [], ban1: [], ban2: [] });
     createGameTab(index);
     createGameContent(index);
@@ -379,8 +378,8 @@ chooseBoxes.forEach(box => {
 });
 function updateBanList() {
   const currentGameWrapper = document.querySelector(`.game[data-index="${currentGameIndex}"]`);
-  const banBoxes1 = currentGameWrapper.querySelectorAll(`.ban:nth-child(2) .ban-choose`);
-  const banBoxes2 = currentGameWrapper.querySelectorAll(`.ban:nth-child(3) .ban-choose`);
+  const banBoxes1 = currentGameWrapper.querySelectorAll(`.ban1:nth-child(2) .ban-choose`);
+  const banBoxes2 = currentGameWrapper.querySelectorAll(`.ban2:nth-child(3) .ban-choose`);
   const ban1 = [];
   const ban2 = [];
   banBoxes1.forEach(box => {
@@ -391,10 +390,6 @@ function updateBanList() {
     const img = box.querySelector("img");
     if (img?.alt) ban2.push(img.alt);
   });
-  const banList1 = currentGameWrapper.querySelector(`#ban-list-1-${currentGameIndex}`);
-  const banList2 = currentGameWrapper.querySelector(`#ban-list-2-${currentGameIndex}`);
-  if (banList1) banList1.textContent = "Team 1 Ban: " + ban1.join(" , ");
-  if (banList2) banList2.textContent = "Team 2 Ban: " + ban2.join(" , ");
 }
 let heroteam1 = [];
 let heroteam2 = [];
@@ -402,27 +397,37 @@ function updateTeam() {
   const currentGameWrapper = document.querySelector(`.game[data-index="${currentGameIndex}"]`);
   const team1Boxes = currentGameWrapper.querySelectorAll("#team1-container .hero-choose img");
   const team2Boxes = currentGameWrapper.querySelectorAll("#team2-container .hero-choose img");
-    const newTeam1 = Array.from(team1Boxes).map(img => img.alt).filter(alt => alt);
-    const newTeam2 = Array.from(team2Boxes).map(img => img.alt).filter(alt => alt);
-// เพิ่มแบบไม่ซ้ำ
-heroteam1 = [...new Set([...heroteam1, ...newTeam1])];
-heroteam2 = [...new Set([...heroteam2, ...newTeam2])];
-  let team1CC = 0;
-  let team1Damage = 0;
-  let team1Dulability = 0;
-  let typeCount = {
-    "Physical Damage": 0,
-    "Magic Damage": 0,
-    "True Damage": 0
-  };
+  const newTeam1 = Array.from(team1Boxes).map(img => img.alt).filter(alt => alt);
+  const newTeam2 = Array.from(team2Boxes).map(img => img.alt).filter(alt => alt);
+
+  heroteam1 = [...new Set([...heroteam1, ...newTeam1])];
+  heroteam2 = [...new Set([...heroteam2, ...newTeam2])];
+
+  // ✅ เตรียม display ฝั่งซ้าย/ขวา
+  const displayContainer = currentGameWrapper.querySelector(".display");
+  // ✅ ฟังก์ชันช่วยสร้าง/อัปเดต <p>
+  function setStat(displayEl, id, text) {
+    let p = displayEl.querySelector(`#${id}-${currentGameIndex}`);
+    if (!p) {
+      p = document.createElement("p");
+      p.id = `${id}-${currentGameIndex}`;
+      displayEl.appendChild(p);
+    }
+    p.innerHTML = text;
+  }
+
+  // ✅ คำนวณค่าทีม 1
+  let team1CC = 0, team1Damage = 0, team1Dulability = 0, team1Time = 0;
+  let typeCount = { "Physical Damage": 0, "Magic Damage": 0, "True Damage": 0 };
   let magicCount = 0;
+
   team1Boxes.forEach(img => {
-    const heroName = img.alt;
-    const hero = heroDataList.find(h => h.Hero === heroName);
+    const hero = heroDataList.find(h => h.Hero === img.alt);
     if (hero) {
-      if (hero.CC) team1CC += Number(hero.CC);
-      if (hero.Damage) team1Damage += Number(hero.Damage);
-      if (hero.Dulability) team1Dulability += Number(hero.Dulability);
+      team1CC += Number(hero.CC || 0);
+      team1Damage += Number(hero.Damage || 0);
+      team1Dulability += Number(hero.Dulability || 0);
+      team1Time += Number(hero.time || 0);
       const type = hero["Damage Type"]?.trim().toLowerCase();
       if (type === "magic damage") {
         typeCount["Magic Damage"]++;
@@ -434,9 +439,8 @@ heroteam2 = [...new Set([...heroteam2, ...newTeam2])];
       }
     }
   });
-  let maxType = "N/A";
-  let maxCount = 0;
-  let maxTypes = [];
+
+  let maxType = "N/A", maxCount = 0, maxTypes = [];
   for (let type in typeCount) {
     if (typeCount[type] > maxCount) {
       maxCount = typeCount[type];
@@ -445,97 +449,122 @@ heroteam2 = [...new Set([...heroteam2, ...newTeam2])];
       maxTypes.push(type);
     }
   }
-  if (maxTypes.length === 1) {
-    maxType = maxTypes[0];
-  } else if (maxTypes.length > 1) {
-    maxType = "ผสม";
-  }
-  const ccDisplay = currentGameWrapper.querySelector(`#cc-display-${currentGameIndex}`);
-  const dmgTypeDisplay = currentGameWrapper.querySelector(`#dmgtype-display-${currentGameIndex}`);
-  const dmgDisplay = currentGameWrapper.querySelector(`#damage-display-${currentGameIndex}`);
-  const duraDisplay = currentGameWrapper.querySelector(`#dura-display-${currentGameIndex}`);
-  if (ccDisplay) {
-    let ccText = `Team 1 CC: ${team1CC}`;
-    if (team1CC < 7) ccText += ` <span class="cc-warning">(CC น้อยเกินไป)</span>`;
-    ccDisplay.innerHTML = ccText;
-  }
-  if (dmgTypeDisplay) {
-    let dmgTypeText = `Team 1 Damage Type: <strong>${maxType}</strong>`;
-    if (magicCount === 0) {
-      dmgTypeText += ` <span class="cc-warning">(ต้องการดาเมจเวท)</span>`;
-    } else if (magicCount >= 3) {
-      dmgTypeText += ` <span class="cc-warning">(ดาเมจเวทมากเกินไป)</span>`;
-    }
-    dmgTypeDisplay.innerHTML = dmgTypeText;
-  }
-  if (dmgDisplay) {
-    let dmgText = `Team 1 Damage: ${team1Damage}`;
-    if (team1Damage < 15) dmgText += ` <span class="cc-warning">(ดาเมจน้อยเกินไป)</span>`;
-    dmgDisplay.innerHTML = dmgText;
-  }
-  if (duraDisplay) {
-    let duraText = `Team 1 Dulability: ${team1Dulability}`;
-    if (team1Dulability < 7) duraText += ` <span class="cc-warning">(ตัวรับดาเมจน้อยเกินไป)</span>`;
-    duraDisplay.innerHTML = duraText;
-  }
-  // 🔴 ตรวจสอบการเปิดแมพ
-  const displayContainer = currentGameWrapper.querySelector(".display");
-  const oldWarnings = displayContainer.querySelectorAll(".extra-warning");
-  oldWarnings.forEach(el => el.remove());
-  const team2HasInvisible = Array.from(team2Boxes).some(img => {
-    const hero = heroDataList.find(h => h.Hero === img.alt);
-    return hero?.Ability?.toLowerCase().includes("invisible");
-  });
-  const team1HasSight = Array.from(team1Boxes).some(img => {
-    const hero = heroDataList.find(h => h.Hero === img.alt);
-    return hero?.Ability?.toLowerCase().includes("sight");
-  });
-  if (team2HasInvisible && !team1HasSight) {
-    const warn = document.createElement("p");
-    warn.className = "ban-list cc-warning extra-warning";
-    warn.textContent = "ต้องการ hero เปิดแมพ";
-    displayContainer.appendChild(warn);
-  }
-  let team1Time = 0;
-let team2Time = 0;
+  if (maxTypes.length === 1) maxType = maxTypes[0];
+  else if (maxTypes.length > 1) maxType = "ผสม";
 
-team1Boxes.forEach(img => {
-  const hero = heroDataList.find(h => h.Hero === img.alt);
-  if (hero?.time) team1Time += Number(hero.time);
-});
+  // ✅ คำนวณค่าทีม 2
+  let team2CC = 0, team2Damage = 0, team2Dulability = 0, team2Time = 0;
+  team2Boxes.forEach(img => {
+    const hero = heroDataList.find(h => h.Hero === img.alt);
+    if (hero) {
+      team2CC += Number(hero.CC || 0);
+      team2Damage += Number(hero.Damage || 0);
+      team2Dulability += Number(hero.Dulability || 0);
+      team2Time += Number(hero.time || 0);
+    }
+  });
+  let team2TypeCount = {
+  "Physical Damage": 0,
+  "Magic Damage": 0,
+  "True Damage": 0
+};
+let team2MagicCount = 0;
+
 team2Boxes.forEach(img => {
   const hero = heroDataList.find(h => h.Hero === img.alt);
-  if (hero?.time) team2Time += Number(hero.time);
+  if (hero) {
+    const type = hero["Damage Type"]?.trim().toLowerCase();
+    if (type === "magic damage") {
+      team2TypeCount["Magic Damage"]++;
+      team2MagicCount++;
+    } else if (type === "physical damage") {
+      team2TypeCount["Physical Damage"]++;
+    } else if (type === "true damage") {
+      team2TypeCount["True Damage"]++;
+    }
+  }
 });
 
-// 🟢 แสดงผลรวม time
-let timeDisplay = currentGameWrapper.querySelector(`#time-display-${currentGameIndex}`);
-if (!timeDisplay) {
-  timeDisplay = document.createElement("p");
-  timeDisplay.id = `time-display-${currentGameIndex}`;
-  timeDisplay.className = "ban-list";
-  const displaySection = currentGameWrapper.querySelector(".display");
-  displaySection.appendChild(timeDisplay);
+let team2MaxType = "N/A", team2MaxCount = 0, team2MaxTypes = [];
+for (let type in team2TypeCount) {
+  if (team2TypeCount[type] > team2MaxCount) {
+    team2MaxCount = team2TypeCount[type];
+    team2MaxTypes = [type];
+  } else if (team2TypeCount[type] === team2MaxCount && team2MaxCount > 0) {
+    team2MaxTypes.push(type);
+  }
+}
+if (team2MaxTypes.length === 1) team2MaxType = team2MaxTypes[0];
+else if (team2MaxTypes.length > 1) team2MaxType = "ผสม";
+
+const warnings = [];
+
+if (team1CC < 7) warnings.push("CC น้อยเกินไป");
+if (team1Damage < 15) warnings.push("ดาเมจน้อยเกินไป");
+if (team1Dulability < 7) warnings.push("อึดน้อยเกินไป");
+if (magicCount >= 3) warnings.push("ดาเมจเวทมากเกินไป");
+
+displayContainer.innerHTML = "";
+
+setStatRow(displayContainer, `Team 1 CC: ${team1CC}`, `Team 2 CC: ${team2CC}`);
+setStatRow(displayContainer, `ดาเมจรวม: ${team1Damage}`, `ดาเมจรวม: ${team2Damage}`);
+setStatRow(displayContainer, `ความอึด: ${team1Dulability}`, `ความอึด: ${team2Dulability}`);
+setStatRow(displayContainer, `ประเภทดาเมจ: ${maxType}`, `ประเภทดาเมจ: ${team2MaxType}`);
+setStatRow(displayContainer, `เกมช่วง: ${getTimeLabel(team1Time)}`, `เกมช่วง: ${getTimeLabel(team2Time)}`);
+
+// ❗️ต้องมาก่อนคำเตือนพิเศษ
+if (warnings.length > 0) {
+  const warningContainer = document.createElement("div");
+  warningContainer.className = "warning-container";
+  warnings.forEach(text => {
+    const p = document.createElement("p");
+    p.className = "ban-list cc-warning";
+    p.textContent = text;
+    warningContainer.appendChild(p);
+  });
+  displayContainer.appendChild(warningContainer);
 }
 
-// 🟡 ฟังก์ชันช่วยแปลง time → label
-function getTimeLabel(time) {
-  if (time < 7) return "ทีมต้นเกม";
-  if (time <= 12) return "ทีมกลางเกม";
-  return "ทีมเลทเกม";
+// ✅ ตรวจสอบเปิดแมพ (มาแสดงใหม่แน่ ๆ)
+const team2HasInvisible = Array.from(team2Boxes).some(img => {
+  const hero = heroDataList.find(h => h.Hero === img.alt);
+  return hero?.Ability?.toLowerCase().includes("invisible");
+});
+const team1HasSight = Array.from(team1Boxes).some(img => {
+  const hero = heroDataList.find(h => h.Hero === img.alt);
+  return hero?.Ability?.toLowerCase().includes("sight");
+});
+if (team2HasInvisible && !team1HasSight) {
+  const warn = document.createElement("p");
+  warn.className = "ban-list cc-warning";
+  warn.textContent = "ต้องการ hero เปิดแมพ";
+  displayContainer.appendChild(warn);
 }
 
-const team1Label = getTimeLabel(team1Time);
-const team2Label = getTimeLabel(team2Time);
-
-// 🟢 แสดงรวมทั้งสองทีมในบรรทัดเดียว
-timeDisplay.innerHTML = `
-  Team 1: ${team1Time} (${team1Label})<br>
-  Team 2: ${team2Time} (${team2Label})
-`;
-
-
+  // 🟡 ฟังก์ชันช่วย
+  function getTimeLabel(time) {
+    if (time === 0) return " ";
+    if (time < 7) return "ทีมต้นเกม";
+    if (time <= 12) return "ทีมกลางเกม";
+    return "ทีมเลทเกม";
+  }
 }
+function setStatRow(displayEl, team1Text, team2Text) {
+  const row = document.createElement("div");
+  row.className = "stat-row";
+
+  const p1 = document.createElement("p");
+  p1.className = "ban-list";
+  p1.textContent = team1Text;
+
+  const p2 = document.createElement("p");
+  p2.className = "ban-list";
+  p2.textContent = team2Text;
+
+  row.appendChild(p1);
+  row.appendChild(p2);
+  displayEl.appendChild(row);
+}
+
 initGallery(heroDataList); 
-
 });
