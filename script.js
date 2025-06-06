@@ -18,12 +18,15 @@ function createGameContent(index) {
     gameWrapper.dataset.index = index;
     gameWrapper.innerHTML = `
         <div class="ban-pick" id="ban-pick-${index}"> 
+            <div class="team-section">
+            <div class="team-label1">Team 1</div>
             <div id="team1-container">
             <div class="hero-choose" id="AbyssalDragon1"><img src="/assest/etc/AbyssalDragon.webp" data-default="/assest/etc/AbyssalDragon.webp"></div>
             <div class="hero-choose" id="Support1"><img src="/assest/etc/Support.webp" data-default="/assest/etc/Support.webp"></div>
             <div class="hero-choose" id="Mid1">  <img src="/assest/etc/Mid.webp" data-default="/assest/etc/Mid.webp"></div>
             <div class="hero-choose" id="Jungle1"><img src="/assest/etc/Jungle.webp" data-default="/assest/etc/Jungle.webp"></div>
             <div class="hero-choose" id="DarkSlayer1"><img src="/assest/etc/DarkSlayer.webp" data-default="/assest/etc/DarkSlayer.webp"></div>
+            </div>
             </div>
             <div class="ban1">
                 <div class="ban-choose" id="Ban1"></div>
@@ -37,6 +40,8 @@ function createGameContent(index) {
                 <div class="ban-choose" id="Ban2"></div>
                 <div class="ban-choose" id="Ban2"></div>
             </div>
+            <div class="team-section">
+            <div class="team-label2">Team 2</div>
             <div id="team2-container">
             <div class="hero-choose" id="AbyssalDragon2"><img src="/assest/etc/AbyssalDragon.webp" data-default="/assest/etc/AbyssalDragon.webp"></div>
             <div class="hero-choose" id="Support2"><img src="/assest/etc/Support.webp" data-default="/assest/etc/Support.webp"></div>
@@ -44,13 +49,14 @@ function createGameContent(index) {
             <div class="hero-choose" id="Jungle2"><img src="/assest/etc/Jungle.webp" data-default="/assest/etc/Jungle.webp"></div>
             <div class="hero-choose" id="DarkSlayer2"><img src="/assest/etc/DarkSlayer.webp" data-default="/assest/etc/DarkSlayer.webp"></div>
             </div>
+            </div>
         </div>
         <div class="content" id="content-${index}">
             <div class="display ">
+              
             </div>
         <div class="hero-select">
             <div id="lane-filter" style="margin-bottom: 10px;">
-                <button data-lane="ทั้งหมด">ทั้งหมด</button>
                 <button data-lane="Abyssal">แครี่</button>
                 <button data-lane="Support">ซัพ</button>
                 <button data-lane="Mid">เมจ</button>
@@ -140,13 +146,6 @@ filterButtons.forEach(button => {
     button.addEventListener('click', () => {
         const lane = button.dataset.lane;
         const type = button.dataset.type;
-        if (lane === "ทั้งหมด") {
-            selectedLanes.clear();
-            selectedTypes.clear();
-            filterButtons.forEach(btn => btn.classList.remove("active"));
-            initGallery(heroDataList, gallery);
-            return;
-        }
         const isActive = button.classList.toggle("active");
         if (lane) {
             isActive ? selectedLanes.add(lane) : selectedLanes.delete(lane);
@@ -200,7 +199,7 @@ tabAdd.addEventListener('click', () => {
     console.log("Hero Team 2:", heroteam2);
     if (gameData.length >= MAX_GAMES) return;
     const index = gameData.length;
-    if (index === 6) { // เกมที่ 7 (index เริ่มจาก 0)
+    if (index === 6) { 
         heroteam1 = [];
         heroteam2 = [];
     }
@@ -225,6 +224,7 @@ fetch('./ROV.csv')
         const lines = csvText.trim().split('\n');
         const header = lines[0].split(',').map(h => h.trim());
         const noteIndex = header.indexOf("หมายเหตุ");
+        const weakness = header.indexOf("Weakness");
         for (let i = 1; i < lines.length; i++) {
             const cols = lines[i].split(',').map(c => c.trim());
             if (!cols[0]) continue;
@@ -234,6 +234,7 @@ fetch('./ROV.csv')
                 heroObj[key] = cols[index] || "";
             }
             });
+            heroObj.weakness = cols[weakness] || "";
             let timeRaw = "";
             header.forEach((key, index) => {
               const col = cols[index] || "";
@@ -305,14 +306,6 @@ filterButtons.forEach(button => {
     button.addEventListener('click', () => {
     const lane = button.dataset.lane;
     const type = button.dataset.type;
-    // ถ้ากด "ทั้งหมด" -> ล้างทุกอย่าง
-    if (lane === "ทั้งหมด") {
-      selectedLanes.clear();
-      selectedTypes.clear();
-      filterButtons.forEach(btn => btn.classList.remove("active"));
-      initGallery(heroDataList);
-      return;
-    }
     // toggle active class
     const isActive = button.classList.toggle("active");
     if (lane) {
@@ -352,30 +345,7 @@ filterButtons.forEach(button => {
     initGallery(filtered);
   });
 });
-const chooseBoxes = document.querySelectorAll(".hero-choose, .ban-choose");
-chooseBoxes.forEach(box => {
-  const originalImg = box.querySelector("img");
-  box.addEventListener("click", () => {
-    const imgInBox = box.querySelector("img");
-    // คืนฮีโร่เก่ากลับ gallery
-    if (imgInBox && imgInBox.alt) {
-      const heroName = imgInBox.alt;
-      imgInBox.src = originalImg.dataset.default;
-      imgInBox.alt = "";
-        updateTeam(); 
-        initGallery(heroDataList);
-    }
-    // ใส่ฮีโร่ใหม่
-    else if (selectedHero && selectedElement) {
-      imgInBox.src = `./assest/hero/${selectedHero}.webp`;
-      imgInBox.alt = selectedHero;
-        selectedElement.classList.add("picked");
-        selectedElement.style.outline = "none";
-        selectedHero = null;
-        selectedElement = null;
-    }
-  });
-});
+
 function updateBanList() {
   const currentGameWrapper = document.querySelector(`.game[data-index="${currentGameIndex}"]`);
   const banBoxes1 = currentGameWrapper.querySelectorAll(`.ban1:nth-child(2) .ban-choose`);
@@ -418,7 +388,7 @@ function updateTeam() {
 
   // ✅ คำนวณค่าทีม 1
   let team1CC = 0, team1Damage = 0, team1Dulability = 0, team1Time = 0;
-  let typeCount = { "Physical Damage": 0, "Magic Damage": 0, "True Damage": 0 };
+  let typeCount = { "กายภาพ": 0, "เวท": 0, "จริง": 0 };
   let magicCount = 0;
 
   team1Boxes.forEach(img => {
@@ -430,12 +400,12 @@ function updateTeam() {
       team1Time += Number(hero.time || 0);
       const type = hero["Damage Type"]?.trim().toLowerCase();
       if (type === "magic damage") {
-        typeCount["Magic Damage"]++;
+        typeCount["เวท"]++;
         magicCount++;
       } else if (type === "physical damage") {
-        typeCount["Physical Damage"]++;
+        typeCount["กายภาพ"]++;
       } else if (type === "true damage") {
-        typeCount["True Damage"]++;
+        typeCount["จริง"]++;
       }
     }
   });
@@ -454,6 +424,7 @@ function updateTeam() {
 
   // ✅ คำนวณค่าทีม 2
   let team2CC = 0, team2Damage = 0, team2Dulability = 0, team2Time = 0;
+  let typeCount2 = { "กายภาพ": 0, "เวท": 0, "จริง": 0 };
   team2Boxes.forEach(img => {
     const hero = heroDataList.find(h => h.Hero === img.alt);
     if (hero) {
@@ -461,36 +432,24 @@ function updateTeam() {
       team2Damage += Number(hero.Damage || 0);
       team2Dulability += Number(hero.Dulability || 0);
       team2Time += Number(hero.time || 0);
+      const type = hero["Damage Type"]?.trim().toLowerCase();
+      if (type === "magic damage") {
+        typeCount2["เวท"]++;
+        magicCount++;
+      } else if (type === "physical damage") {
+        typeCount2["กายภาพ"]++;
+      } else if (type === "true damage") {
+        typeCount2["จริง"]++;
+      }
     }
   });
-  let team2TypeCount = {
-  "Physical Damage": 0,
-  "Magic Damage": 0,
-  "True Damage": 0
-};
-let team2MagicCount = 0;
-
-team2Boxes.forEach(img => {
-  const hero = heroDataList.find(h => h.Hero === img.alt);
-  if (hero) {
-    const type = hero["Damage Type"]?.trim().toLowerCase();
-    if (type === "magic damage") {
-      team2TypeCount["Magic Damage"]++;
-      team2MagicCount++;
-    } else if (type === "physical damage") {
-      team2TypeCount["Physical Damage"]++;
-    } else if (type === "true damage") {
-      team2TypeCount["True Damage"]++;
-    }
-  }
-});
 
 let team2MaxType = "N/A", team2MaxCount = 0, team2MaxTypes = [];
-for (let type in team2TypeCount) {
-  if (team2TypeCount[type] > team2MaxCount) {
-    team2MaxCount = team2TypeCount[type];
+for (let type in typeCount2) {
+  if (typeCount2[type] > team2MaxCount) {
+    team2MaxCount = typeCount2[type];
     team2MaxTypes = [type];
-  } else if (team2TypeCount[type] === team2MaxCount && team2MaxCount > 0) {
+  } else if (typeCount2[type] === team2MaxCount && team2MaxCount > 0) {
     team2MaxTypes.push(type);
   }
 }
@@ -499,18 +458,17 @@ else if (team2MaxTypes.length > 1) team2MaxType = "ผสม";
 
 const warnings = [];
 
-if (team1CC < 7) warnings.push("CC น้อยเกินไป");
-if (team1Damage < 15) warnings.push("ดาเมจน้อยเกินไป");
-if (team1Dulability < 7) warnings.push("อึดน้อยเกินไป");
 if (magicCount >= 3) warnings.push("ดาเมจเวทมากเกินไป");
 
 displayContainer.innerHTML = "";
-
-setStatRow(displayContainer, `Team 1 CC: ${team1CC}`, `Team 2 CC: ${team2CC}`);
-setStatRow(displayContainer, `ดาเมจรวม: ${team1Damage}`, `ดาเมจรวม: ${team2Damage}`);
-setStatRow(displayContainer, `ความอึด: ${team1Dulability}`, `ความอึด: ${team2Dulability}`);
+setStatRow(displayContainer, `Team 1`,`Team 2`)
+setStatRow(displayContainer, `CC: ${getCCLabel(team1CC)}`, `CC: ${getCCLabel(team2CC)}`);
+setStatRow(displayContainer, `ดาเมจรวม: ${getDmgLabel(team1Damage)}`, `ดาเมจรวม: ${getDmgLabel(team2Damage)}`);
+setStatRow(displayContainer, `ความอึด: ${getDefLabel(team1Dulability)}`, `ความอึด: ${getDefLabel(team2Dulability)}`);
 setStatRow(displayContainer, `ประเภทดาเมจ: ${maxType}`, `ประเภทดาเมจ: ${team2MaxType}`);
 setStatRow(displayContainer, `เกมช่วง: ${getTimeLabel(team1Time)}`, `เกมช่วง: ${getTimeLabel(team2Time)}`);
+setStatRow(displayContainer, `ฮีโร่ทีม 1: ${heroteam1.join(", ")}`, `ฮีโร่ทีม 2: ${heroteam2.join(", ")}`);
+
 
 // ❗️ต้องมาก่อนคำเตือนพิเศษ
 if (warnings.length > 0) {
@@ -540,8 +498,27 @@ if (team2HasInvisible && !team1HasSight) {
   warn.textContent = "ต้องการ hero เปิดแมพ";
   displayContainer.appendChild(warn);
 }
-
-  // 🟡 ฟังก์ชันช่วย
+  function getDefLabel(def){
+    if (def === 0) return " ";
+    if (def < 7) return "บาง";
+    if (def < 12) return "ปานกลาง";
+    return "ถึก"; 
+  }
+  function getDmgLabel(dmg){
+    if (dmg === 0) return " ";
+    if (dmg < 12) return "น้อย";
+    if (dmg <= 15) return "ปานกลาง";
+    if (dmg <= 21) return "เยอะ";
+    return "ล้น";
+  }
+  // เช็ค CC
+  function getCCLabel(CC){
+    if (CC === 0) return " ";
+    if (CC < 5) return "น้อย";
+    if (CC <= 9) return "ปานกลาง";
+    return "เยอะ";
+  }
+  // เช็คความเลทฮีโร่
   function getTimeLabel(time) {
     if (time === 0) return " ";
     if (time < 7) return "ทีมต้นเกม";

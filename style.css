@@ -56,9 +56,10 @@ img.disabled {
   height: 100%;
 }
 .ban1 ,.ban2 {
+  margin-top: 40px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 5px;
+  gap: 0px;
 }
 .ban-choose {
     width: 45px;
@@ -143,3 +144,22 @@ img.disabled {
   margin-top: 12px;
   white-space: normal;
 }
+.team-label1 {
+  font-weight: bold;
+  font-size: 25px;
+  text-align: left;
+  margin-bottom: 5px;
+  color: white;
+}
+.team-label2 {
+  font-weight: bold;
+  font-size: 25px;
+  text-align: ight;
+  margin-bottom: 5px;
+  color: white;
+}
+.team-section {
+  display: flex;
+  flex-direction: column;
+}
+
