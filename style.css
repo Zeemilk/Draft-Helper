@@ -62,6 +62,20 @@ body {
     margin-left: 5px;
     font-weight: bold;
 }
+.tab-win {
+    background-color: #940707;
+    color: white;
+    padding: 5px 18px;
+    border-radius: 3px;
+    font-weight: bold;
+}
+.tab-lose {
+    background-color: #101692;
+    color: white;
+    padding: 5px 18px;
+    border-radius: 3px;
+    font-weight: bold;
+}
 .ban-pick {
     display: flex;
     flex-wrap: wrap;
@@ -204,4 +218,16 @@ img.disabled {
 .team-section {
   display: flex;
   flex-direction: column;
+}
+.hero-red {
+  background: #f88 !important;
+  filter: none !important;
+}
+.hero-blue {
+  background: #88f !important;
+  filter: none !important;
+}
+.hero-gray {
+  background: #aaa !important;
+  filter: grayscale(1) !important;
 }

@@ -174,7 +174,7 @@ function bindEventsToGame(index) {
             const matchSearch = !searchText || (h.Hero && h.Hero.toLowerCase().includes(searchText.toLowerCase()));
             return matchLane && matchType && matchSearch;
         });
-        initGallery(filtered, gallery, false);
+        initGallery(filtered, gallery, true);
     }
 
     filterButtons.forEach(button => {
@@ -222,20 +222,18 @@ function switchGame(index) {
     updateTabSelectionBar();
 }
 tabAdd.addEventListener('click', () => {
-    console.log("Hero Team 1:", heroteam1);
-    console.log("Hero Team 2:", heroteam2);
     if (gameData.length >= MAX_GAMES) return;
     const index = gameData.length;
     if (index === 6) { 
-        heroteam1 = [];
-        heroteam2 = [];
+        team1choose = [];
+        team2choose = [];
     }
     gameData.push({ team1: [], team2: [], ban1: [], ban2: [] });
     createGameTab(index);
     createGameContent(index);
     const newGallery = document.querySelector(`#content-${index} #hero-gallery`);
     if (newGallery) {
-        initGallery(heroDataList, newGallery);
+        initGallery(heroDataList, newGallery,false);
     }
     switchGame(index);
     if (gameData.length >= MAX_GAMES) {
@@ -287,30 +285,25 @@ fetch('./ROV.csv')
         initGallery(heroDataList);
         updateTeam();
     });
-function initGallery(heroList, targetGallery, applyColor = true) {
+function initGallery(heroList, targetGallery, none = true) {
     const gallery = targetGallery || document.querySelector("#hero-gallery");
+    if (!gallery) return; // <--- เพิ่มบรรทัดนี้
     gallery.innerHTML = "";
-    // ตรวจสอบฮีโร่ที่ถูกใช้ในทุกเกมก่อนหน้า
-    const allUsedHeroes = {};
-    for (let i = 0; i <= currentGameIndex; i++) {
-        const game = gameData[i];
-        game.team1.forEach(h => allUsedHeroes[h] = allUsedHeroes[h] ? [...allUsedHeroes[h], 'team1'] : ['team1']);
-        game.team2.forEach(h => allUsedHeroes[h] = allUsedHeroes[h] ? [...allUsedHeroes[h], 'team2'] : ['team2']);
-    }
-    // ตรวจสอบฮีโร่ที่ถูกเลือกใน hero-choose
+
     const currentGameWrapper = document.querySelector(`.game[data-index="${currentGameIndex}"]`);
     const team1Boxes = currentGameWrapper.querySelectorAll("#team1-container .hero-choose img");
     const team2Boxes = currentGameWrapper.querySelectorAll("#team2-container .hero-choose img");
-    // ตรวจสอบฮีโร่ที่ถูกเลือกใน ban1 และ ban2
     const ban1Boxes = currentGameWrapper.querySelectorAll(".ban1 .ban-choose img");
     const ban2Boxes = currentGameWrapper.querySelectorAll(".ban2 .ban-choose img");
 
-    const chosenHeroes = [
-        ...Array.from(team1Boxes).map(img => img.alt).filter(Boolean),
-        ...Array.from(team2Boxes).map(img => img.alt).filter(Boolean),
-        ...Array.from(ban1Boxes).map(img => img.alt).filter(Boolean),
-        ...Array.from(ban2Boxes).map(img => img.alt).filter(Boolean)
-    ];
+    // newTeam1/newTeam2 = ทีมที่เลือกในรอบนี้
+    const newTeam1 = Array.from(team1Boxes).map(img => img.alt).filter(Boolean);
+    const newTeam2 = Array.from(team2Boxes).map(img => img.alt).filter(Boolean);
+    const ban1 = Array.from(ban1Boxes).map(img => img.alt).filter(Boolean);
+    const ban2 = Array.from(ban2Boxes).map(img => img.alt).filter(Boolean);
+
+    // รวมทั้งหมดที่ต้องซ่อน
+    const chosenHeroes = [...newTeam1, ...newTeam2, ...ban1, ...ban2];
 
     heroList.forEach(heroObj => {
         const hero = heroObj.Hero;
@@ -324,20 +317,11 @@ function initGallery(heroList, targetGallery, applyColor = true) {
         img.style.height = "80px";
         img.style.border = "1px solid #000";
         img.style.cursor = "pointer";
-        // ซ่อนรูปถ้าเลือกไปแล้ว (รวม ban)
+
+      if (none) {
         if (chosenHeroes.includes(hero)) {
             img.style.display = "none";
-        }
-        // เปลี่ยนสีเฉพาะตอน applyColor
-        if (applyColor) {
-            if (heroteam1.includes(hero) && heroteam2.includes(hero)) {
-                img.style.filter = "grayscale(100%)"; // เทา
-            } else if (heroteam1.includes(hero)) {
-                img.style.filter = "sepia(100%) hue-rotate(-50deg) saturate(300%) brightness(90%)"; // แดง
-            } else if (heroteam2.includes(hero)) {
-                img.style.filter = "sepia(100%) hue-rotate(190deg) saturate(300%) brightness(90%)"; // น้ำเงิน
-            }
-        }
+        }}
         wrapper.appendChild(img);
         img.addEventListener("click", () => {
             if (selectedElement) selectedElement.style.outline = "none";
@@ -363,9 +347,15 @@ function updateBanList() {
     if (img?.alt) ban2.push(img.alt);
   });
 }
-let heroteam1 = [];
-let heroteam2 = [];
 let lastFilteredHero = null;
+let win1 = 0;
+let win2 = 0;
+function winner() {
+  win1++;
+}
+function loser() {
+  win2++;
+}
 function updateTeam() {
   const currentGameWrapper = document.querySelector(`.game[data-index="${currentGameIndex}"]`);
   const team1Boxes = currentGameWrapper.querySelectorAll("#team1-container .hero-choose img");
@@ -373,11 +363,9 @@ function updateTeam() {
   const newTeam1 = Array.from(team1Boxes).map(img => img.alt).filter(alt => alt);
   const newTeam2 = Array.from(team2Boxes).map(img => img.alt).filter(alt => alt);
 
-  heroteam1 = [...newTeam1];
-  heroteam2 = [...newTeam2];
   if (lastFilteredHero) {
   const gallery = currentGameWrapper.querySelector("#hero-gallery");
-  initGallery(heroDataList, gallery, false);
+  initGallery(heroDataList, gallery, true);
   lastFilteredHero = null;
 }
 
@@ -469,6 +457,7 @@ if (magicCount >= 3) warnings.push("ดาเมจเวทมากเกิ�
 
 displayContainer.innerHTML = "";
 setStatRow(displayContainer, `Team 1`,`Team 2`)
+setStatRow(displayContainer, `Win: ${win1}`, `Win: ${win2}`);
 setStatRow(displayContainer, `CC: ${getCCLabel(team1CC)}`, `CC: ${getCCLabel(team2CC)}`);
 setStatRow(displayContainer, `ดาเมจรวม: ${getDmgLabel(team1Damage)}`, `ดาเมจรวม: ${getDmgLabel(team2Damage)}`);
 setStatRow(displayContainer, `ความอึด: ${getDefLabel(team1Dulability)}`, `ความอึด: ${getDefLabel(team2Dulability)}`);
@@ -477,9 +466,9 @@ setStatRow(displayContainer, `เกมช่วง: ${getTimeLabel(team1Time)}`
 setStatRow(
   displayContainer,
   // ฝั่ง team 1 แสดงเป็นรูปเหมือนเดิม
-  `${heroteam1.map(hero => `<img src="./asset/hero/${hero}.webp" alt="${hero}" title="${hero}" style="width:32px;height:32px;vertical-align:middle;margin-right:4px;border:1px solid #888;border-radius:4px;cursor:pointer;" class="team1-hero-img">`).join("")}`,
+  `${newTeam1.map(hero => `<img src="./asset/hero/${hero}.webp" alt="${hero}" title="${hero}" style="width:32px;height:32px;vertical-align:middle;margin-right:4px;border:1px solid #888;border-radius:4px;cursor:pointer;" class="team1-hero-img">`).join("")}`,
   // ฝั่ง team 2 แสดงเป็นรูปและเพิ่ม event คลิก
-  `${heroteam2.map(hero => `<img src="./asset/hero/${hero}.webp" alt="${hero}" title="${hero}" style="width:32px;height:32px;vertical-align:middle;margin-right:4px;border:1px solid #888;border-radius:4px;cursor:pointer;" class="team2-hero-img">`).join("")}`
+  `${newTeam2.map(hero => `<img src="./asset/hero/${hero}.webp" alt="${hero}" title="${hero}" style="width:32px;height:32px;vertical-align:middle;margin-right:4px;border:1px solid #888;border-radius:4px;cursor:pointer;" class="team2-hero-img">`).join("")}`
 );
 
 // หลังจาก setStatRow แล้ว ให้เพิ่ม event ให้กับรูป team2
@@ -493,7 +482,7 @@ setTimeout(() => {
       const heroName = img.alt;
       // toggle filter: ถ้ากดซ้ำที่ตัวเดิม ให้ยกเลิก filter
       if (lastFilteredHero === heroName) {
-        initGallery(heroDataList, gallery, false);
+        initGallery(heroDataList, gallery, true);
         lastFilteredHero = null;
         return;
       }
@@ -520,7 +509,7 @@ setTimeout(() => {
       // รวม Soul_Scroll, Sight ไว้ข้างหน้า
       const finalResult = [...result, ...filtered];
       // ถ้าไม่มี result ให้โชว์ว่าง
-      initGallery(finalResult.length ? finalResult : [], gallery, false);
+      initGallery(finalResult.length ? finalResult : [], gallery, true);
     });
   });
 }, 0);
@@ -605,8 +594,31 @@ function setStatRow(displayEl, team1Text, team2Text) {
   row.appendChild(p2);
   displayEl.appendChild(row);
 }
+// ===== เพิ่มปุ่ม Win/Lose ไปขวาสุดของ tab-bar =====
+const winLoseContainer = document.createElement('div');
+winLoseContainer.style.marginLeft = 'auto';
+winLoseContainer.style.display = 'flex';
+winLoseContainer.style.gap = '8px';
 
-// เพิ่ม selection bar ถ้ายังไม่มี
+const winBtn = document.createElement('button');
+winBtn.className = 'tab-win';
+winBtn.textContent = 'Win';
+winBtn.onclick = () => {
+    win1++;
+    updateTeam();
+};
+const loseBtn = document.createElement('button');
+loseBtn.className = 'tab-lose';
+loseBtn.textContent = 'Lose';
+loseBtn.onclick = () => {
+    win2++;
+    updateTeam();
+};
+
+winLoseContainer.appendChild(winBtn);
+winLoseContainer.appendChild(loseBtn);
+tabBar.appendChild(winLoseContainer);
+
 if (!document.querySelector('.tab-bar .selection')) {
     const selection = document.createElement('span');
     selection.className = 'selection';
@@ -615,6 +627,5 @@ if (!document.querySelector('.tab-bar .selection')) {
 
 // เรียกครั้งแรกหลัง DOMContentLoaded
 setTimeout(updateTabSelectionBar, 0);
-
 initGallery(heroDataList); 
 });
