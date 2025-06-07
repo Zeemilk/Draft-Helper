@@ -11,6 +11,8 @@ function createGameTab(index) {
     tab.textContent = `เกม ${index + 1}`;
     tab.addEventListener('click', () => switchGame(index));
     tabBar.insertBefore(tab, tabAdd);
+    // อัปเดต selection bar
+    setTimeout(updateTabSelectionBar, 0);
 }
 function createGameContent(index) {
     const gameWrapper = document.createElement('div');
@@ -21,11 +23,11 @@ function createGameContent(index) {
             <div class="team-section">
             <div class="team-label1">Team 1</div>
             <div id="team1-container">
-            <div class="hero-choose" id="AbyssalDragon1"><img src="/assest/etc/AbyssalDragon.webp" data-default="/assest/etc/AbyssalDragon.webp"></div>
-            <div class="hero-choose" id="Support1"><img src="/assest/etc/Support.webp" data-default="/assest/etc/Support.webp"></div>
-            <div class="hero-choose" id="Mid1">  <img src="/assest/etc/Mid.webp" data-default="/assest/etc/Mid.webp"></div>
-            <div class="hero-choose" id="Jungle1"><img src="/assest/etc/Jungle.webp" data-default="/assest/etc/Jungle.webp"></div>
-            <div class="hero-choose" id="DarkSlayer1"><img src="/assest/etc/DarkSlayer.webp" data-default="/assest/etc/DarkSlayer.webp"></div>
+            <div class="hero-choose" id="AbyssalDragon1"><img src="/asset/etc/AbyssalDragon.webp" data-default="/asset/etc/AbyssalDragon.webp"></div>
+            <div class="hero-choose" id="Support1"><img src="/asset/etc/Support.webp" data-default="/asset/etc/Support.webp"></div>
+            <div class="hero-choose" id="Mid1">  <img src="/asset/etc/Mid.webp" data-default="/asset/etc/Mid.webp"></div>
+            <div class="hero-choose" id="Jungle1"><img src="/asset/etc/Jungle.webp" data-default="/asset/etc/Jungle.webp"></div>
+            <div class="hero-choose" id="DarkSlayer1"><img src="/asset/etc/DarkSlayer.webp" data-default="/asset/etc/DarkSlayer.webp"></div>
             </div>
             </div>
             <div class="ban1">
@@ -43,11 +45,11 @@ function createGameContent(index) {
             <div class="team-section">
             <div class="team-label2">Team 2</div>
             <div id="team2-container">
-            <div class="hero-choose" id="AbyssalDragon2"><img src="/assest/etc/AbyssalDragon.webp" data-default="/assest/etc/AbyssalDragon.webp"></div>
-            <div class="hero-choose" id="Support2"><img src="/assest/etc/Support.webp" data-default="/assest/etc/Support.webp"></div>
-            <div class="hero-choose" id="Mid2"><img src="/assest/etc/Mid.webp" data-default="/assest/etc/Mid.webp"></div>
-            <div class="hero-choose" id="Jungle2"><img src="/assest/etc/Jungle.webp" data-default="/assest/etc/Jungle.webp"></div>
-            <div class="hero-choose" id="DarkSlayer2"><img src="/assest/etc/DarkSlayer.webp" data-default="/assest/etc/DarkSlayer.webp"></div>
+            <div class="hero-choose" id="AbyssalDragon2"><img src="/asset/etc/AbyssalDragon.webp" data-default="/asset/etc/AbyssalDragon.webp"></div>
+            <div class="hero-choose" id="Support2"><img src="/asset/etc/Support.webp" data-default="/asset/etc/Support.webp"></div>
+            <div class="hero-choose" id="Mid2"><img src="/asset/etc/Mid.webp" data-default="/asset/etc/Mid.webp"></div>
+            <div class="hero-choose" id="Jungle2"><img src="/asset/etc/Jungle.webp" data-default="/asset/etc/Jungle.webp"></div>
+            <div class="hero-choose" id="DarkSlayer2"><img src="/asset/etc/DarkSlayer.webp" data-default="/asset/etc/DarkSlayer.webp"></div>
             </div>
             </div>
         </div>
@@ -57,26 +59,25 @@ function createGameContent(index) {
             </div>
         <div class="hero-select">
             <div id="lane-filter" style="margin-bottom: 10px;">
-                <button data-lane="Abyssal">แครี่</button>
-                <button data-lane="Support">ซัพ</button>
-                <button data-lane="Mid">เมจ</button>
-                <button data-lane="Jungle">ป่า</button>
-                <button data-lane="DarkSlayer">ออฟ</button>
+                <button data-lane="Abyssal">Abyssal</button>
+                <button data-lane="Support">Support</button>
+                <button data-lane="Mid">Mid</button>
+                <button data-lane="Jungle">Jungle</button>
+                <button data-lane="DarkSlayer">Dark</button>
                 <button data-type="Early">ต้น</button>
                 <button data-type="Late">เลท</button>
                 <button data-type="burst">เบิร์ส</button>
                 <button data-type="cc">CC</button>
-                <button data-type="heal">Heal</button>
                 <button data-type="dulability">อึด</button>
-                <button data-type="waveclear">WaveClear</button>
+                <button data-type="waveclear">Wave</button>
                 <button data-type="hardlock">จับตาย</button>
                 <button data-type="sight">เปิดแมพ</button>
                 <button data-type="push">ผลัก</button>
-                <button data-type="hook">รวบ</button>
-                <button data-type="CCresist">ต้านCC</button>
+                <button data-type="hook">เกี่ยว</button>
                 <button data-type="tierS">S</button>
                 <button data-type="tierA">A</button>
             </div>
+            <input type="text" id="hero-search-${index}" placeholder="ค้นหาชื่อฮีโร่..." style="margin-bottom:10px;width:180px;">
             <div id="hero-gallery" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
         </div>
   `;
@@ -91,6 +92,11 @@ function bindEventsToGame(index) {
     const banBoxes1 = gameWrapper.querySelectorAll(`.ban1 .ban-choose`);
     const banBoxes2 = gameWrapper.querySelectorAll(`.ban2 .ban-choose`);
     const filterButtons = gameWrapper.querySelectorAll('#lane-filter button');
+    const searchInput = gameWrapper.querySelector(`#hero-search-${index}`);
+    const selectedLanes = new Set();
+    const selectedTypes = new Set();
+    let searchText = "";
+
   // hero-choose
     chooseBoxes.forEach(box => {
         const originalImg = box.querySelector("img");
@@ -106,7 +112,7 @@ function bindEventsToGame(index) {
                 imgInBox.src = originalImg.dataset.default;
                 imgInBox.alt = "";
             } else if (selectedHero && selectedElement) {
-                imgInBox.src = `./assest/hero/${selectedHero}.webp`;
+                imgInBox.src = `./asset/hero/${selectedHero}.webp`;
                 imgInBox.alt = selectedHero;
                 selectedElement.style.display = "none";
                 selectedElement.style.outline = "none";
@@ -142,50 +148,70 @@ function bindEventsToGame(index) {
     });
 });
 // filter
-filterButtons.forEach(button => {
-    button.addEventListener('click', () => {
-        const lane = button.dataset.lane;
-        const type = button.dataset.type;
-        const isActive = button.classList.toggle("active");
-        if (lane) {
-            isActive ? selectedLanes.add(lane) : selectedLanes.delete(lane);
-        }
-        if (type) {
-            isActive ? selectedTypes.add(type) : selectedTypes.delete(type);
-        }
+    function filterAndShow() {
         let filtered = heroDataList.filter(h => {
             const matchLane = selectedLanes.size === 0 || [...selectedLanes].every(l =>
-            h.Lane && h.Lane.toLowerCase().includes(l.toLowerCase())
-        );
-        const matchType = selectedTypes.size === 0 || [...selectedTypes].every(t => {
-            switch (t) {
-                case 'Early': return h.time_raw && (h.time_raw.includes("early"));
-                case 'Late': return h.time_raw && h.time_raw.includes("late");
-                case 'burst': return h.Ability && h.Ability.toLowerCase().includes("burst");
-                case 'cc': return Number(h.CC) >= 2;
-                case 'heal': return h.Ability && h.Ability.toLowerCase().includes("heal");
-                case 'speed': return Number(h.Mobility) >= 2 && h.Ability && h.Ability.toLowerCase().includes("speed");
-                case 'mobility': return Number(h.Mobility) >= 2 && h.Ability && h.Ability.toLowerCase().includes("dash");
-                case 'dulability': return Number(h.Dulability) >= 2;
-                case 'waveclear': return h.Ability && h.Ability.toLowerCase().includes("wave");
-                case 'hardlock': return h.Ability && h.Ability.toLowerCase().includes("hardlock");
-                case 'sight': return h.Ability && h.Ability.toLowerCase().includes("sight");
-                case 'push': return h.Ability && h.Ability.toLowerCase().includes("push");
-                case 'hook': return h.Ability && h.Ability.toLowerCase().includes("hook");
-                case 'CCresist': return h.Ability && h.Ability.toLowerCase().includes("ccresist");
-                case 'tierS': return h.Tier && h.Tier.toUpperCase().includes("S");
-                case 'tierA': return h.Tier && h.Tier.toUpperCase().includes("A");
-                default: return true;
-            }
+                h.Lane && h.Lane.toLowerCase().includes(l.toLowerCase())
+            );
+            const matchType = selectedTypes.size === 0 || [...selectedTypes].every(t => {
+                switch (t) {
+                    case 'Early': return h.time_raw && (h.time_raw.includes("early"));
+                    case 'Late': return h.time_raw && h.time_raw.includes("late");
+                    case 'burst': return h.Ability && h.Ability.toLowerCase().includes("burst");
+                    case 'cc': return Number(h.CC) >= 2;
+                    case 'mobility': return Number(h.Mobility) >= 2 && h.Ability && h.Ability.toLowerCase().includes("dash");
+                    case 'dulability': return Number(h.Dulability) >= 2;
+                    case 'waveclear': return h.Ability && h.Ability.toLowerCase().includes("wave");
+                    case 'hardlock': return h.Ability && h.Ability.toLowerCase().includes("hardlock");
+                    case 'sight': return h.Ability && h.Ability.toLowerCase().includes("sight");
+                    case 'push': return h.Ability && h.Ability.toLowerCase().includes("push");
+                    case 'hook': return h.Ability && h.Ability.toLowerCase().includes("hook");
+                    case 'tierS': return h.Tier && h.Tier.toUpperCase().includes("S");
+                    case 'tierA': return h.Tier && h.Tier.toUpperCase().includes("A");
+                    default: return true;
+                }
+            });
+            const matchSearch = !searchText || (h.Hero && h.Hero.toLowerCase().includes(searchText.toLowerCase()));
+            return matchLane && matchType && matchSearch;
         });
-        return matchLane && matchType;
-    });  
-        initGallery(filtered, gallery);
+        initGallery(filtered, gallery, false);
+    }
+
+    filterButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const lane = button.dataset.lane;
+            const type = button.dataset.type;
+            const isActive = button.classList.toggle("active");
+            if (lane) {
+                isActive ? selectedLanes.add(lane) : selectedLanes.delete(lane);
+            }
+            if (type) {
+                isActive ? selectedTypes.add(type) : selectedTypes.delete(type);
+            }
+            filterAndShow();
+        });
     });
-  });
+
+    // เพิ่ม event สำหรับ input ค้นหา
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            searchText = e.target.value;
+            filterAndShow();
+        });
+    }
+}
+function updateTabSelectionBar() {
+    const tabBar = document.querySelector('.tab-bar');
+    const tabs = tabBar.querySelectorAll('.tab');
+    const selection = tabBar.querySelector('.selection');
+    const activeTab = tabBar.querySelector('.tab.active') || tabs[0];
+    if (!activeTab || !selection) return;
+    selection.style.width = `${activeTab.offsetWidth}px`;
+    selection.style.left = `${activeTab.offsetLeft}px`;
 }
 function switchGame(index) {
     document.querySelectorAll('.tab').forEach((tab, i) => {
+        tab.classList.toggle('active', i === index);
         tab.style.backgroundColor = i === index ? '#fff' : '#bcd';
     });
     document.querySelectorAll('.game').forEach(game => {
@@ -193,6 +219,7 @@ function switchGame(index) {
     });
     currentGameIndex = index;
     updateTeam();
+    updateTabSelectionBar();
 }
 tabAdd.addEventListener('click', () => {
     console.log("Hero Team 1:", heroteam1);
@@ -260,92 +287,67 @@ fetch('./ROV.csv')
         initGallery(heroDataList);
         updateTeam();
     });
-function initGallery(heroList, targetGallery) {
+function initGallery(heroList, targetGallery, applyColor = true) {
     const gallery = targetGallery || document.querySelector("#hero-gallery");
     gallery.innerHTML = "";
-// ตรวจสอบฮีโร่ที่ถูกใช้ในทุกเกมก่อนหน้า
+    // ตรวจสอบฮีโร่ที่ถูกใช้ในทุกเกมก่อนหน้า
     const allUsedHeroes = {};
     for (let i = 0; i <= currentGameIndex; i++) {
         const game = gameData[i];
         game.team1.forEach(h => allUsedHeroes[h] = allUsedHeroes[h] ? [...allUsedHeroes[h], 'team1'] : ['team1']);
         game.team2.forEach(h => allUsedHeroes[h] = allUsedHeroes[h] ? [...allUsedHeroes[h], 'team2'] : ['team2']);
     }
-heroList.forEach(heroObj => {
-    const hero = heroObj.Hero;
-    const wrapper = document.createElement("div");
-    wrapper.className = "hero-wrapper";
-    const img = document.createElement("img");
-    img.src = `./assest/hero/${hero}.webp`;
-    img.alt = hero;
-    img.title = hero;
-    img.style.width = "80px";
-    img.style.height = "80px";
-    img.style.border = "1px solid #000";
-    img.style.cursor = "pointer";
-    if (heroteam1.includes(hero) && heroteam2.includes(hero)) {
-        img.style.filter = "grayscale(100%)"; // เทา
-    } else if (heroteam1.includes(hero)) {
-        img.style.filter = "sepia(100%) hue-rotate(-50deg) saturate(300%) brightness(90%)"; // แดง
-    } else if (heroteam2.includes(hero)) {
-        img.style.filter = "sepia(100%) hue-rotate(190deg) saturate(300%) brightness(90%)"; // น้ำเงิน
-    }
-    wrapper.appendChild(img);
-    img.addEventListener("click", () => {
-        if (selectedElement) selectedElement.style.outline = "none";
-        selectedHero = hero;
-        selectedElement = img;
-        img.style.outline = "3px solid red";
-    });
-    gallery.appendChild(wrapper);
-});
-}
-const filterButtons = document.querySelectorAll('#lane-filter button');
-const selectedLanes = new Set();
-const selectedTypes = new Set();
-filterButtons.forEach(button => {
-    button.addEventListener('click', () => {
-    const lane = button.dataset.lane;
-    const type = button.dataset.type;
-    // toggle active class
-    const isActive = button.classList.toggle("active");
-    if (lane) {
-        isActive ? selectedLanes.add(lane) : selectedLanes.delete(lane);
-    }
-    if (type) {
-        isActive ? selectedTypes.add(type) : selectedTypes.delete(type);
-    }
-    // กรองตาม filter ที่เลือก
-    let filtered = heroDataList.filter(h => {
-      // Lane filter
-        const matchLane = selectedLanes.size === 0 || [...selectedLanes].every(l =>
-        h.Lane && h.Lane.toLowerCase().includes(l.toLowerCase())
-      );
-        // Type filter
-        const matchType = selectedTypes.size === 0 || [...selectedTypes].every(t => {
-        switch (t) {
-            case 'Early': return h.time_raw && (h.time_raw.includes("early"));
-            case 'Late': return h.time_raw && h.time_raw.includes("late");
-            case 'burst': return h.Ability && h.Ability.toLowerCase().includes("burst");
-            case 'cc': return Number(h.CC) >= 2;
-            case 'heal': return h.Ability && h.Ability.toLowerCase().includes("heal");
-            case 'dulability': return Number(h.Dulability) >= 2;
-            case 'waveclear': return h.Ability && h.Ability.toLowerCase().includes("wave");
-            case 'hardlock': return h.Ability && h.Ability.toLowerCase().includes("hardlock");
-            case 'sight': return h.Ability && h.Ability.toLowerCase().includes("sight");
-            case 'push': return h.Ability && h.Ability.toLowerCase().includes("push");
-            case 'hook': return h.Ability && h.Ability.toLowerCase().includes("hook");
-            case 'CCresist': return h.Ability && h.Ability.toLowerCase().includes("ccresist");
-            case 'tierS': return h.Tier && h.Tier.toUpperCase().includes("S");
-            case 'tierA': return h.Tier && h.Tier.toUpperCase().includes("A");
-            default: return true;
-        }
-        });
-        return matchLane && matchType;
-    });
-    initGallery(filtered);
-  });
-});
+    // ตรวจสอบฮีโร่ที่ถูกเลือกใน hero-choose
+    const currentGameWrapper = document.querySelector(`.game[data-index="${currentGameIndex}"]`);
+    const team1Boxes = currentGameWrapper.querySelectorAll("#team1-container .hero-choose img");
+    const team2Boxes = currentGameWrapper.querySelectorAll("#team2-container .hero-choose img");
+    // ตรวจสอบฮีโร่ที่ถูกเลือกใน ban1 และ ban2
+    const ban1Boxes = currentGameWrapper.querySelectorAll(".ban1 .ban-choose img");
+    const ban2Boxes = currentGameWrapper.querySelectorAll(".ban2 .ban-choose img");
 
+    const chosenHeroes = [
+        ...Array.from(team1Boxes).map(img => img.alt).filter(Boolean),
+        ...Array.from(team2Boxes).map(img => img.alt).filter(Boolean),
+        ...Array.from(ban1Boxes).map(img => img.alt).filter(Boolean),
+        ...Array.from(ban2Boxes).map(img => img.alt).filter(Boolean)
+    ];
+
+    heroList.forEach(heroObj => {
+        const hero = heroObj.Hero;
+        const wrapper = document.createElement("div");
+        wrapper.className = "hero-wrapper";
+        const img = document.createElement("img");
+        img.src = `./asset/hero/${hero}.webp`;
+        img.alt = hero;
+        img.title = hero;
+        img.style.width = "80px";
+        img.style.height = "80px";
+        img.style.border = "1px solid #000";
+        img.style.cursor = "pointer";
+        // ซ่อนรูปถ้าเลือกไปแล้ว (รวม ban)
+        if (chosenHeroes.includes(hero)) {
+            img.style.display = "none";
+        }
+        // เปลี่ยนสีเฉพาะตอน applyColor
+        if (applyColor) {
+            if (heroteam1.includes(hero) && heroteam2.includes(hero)) {
+                img.style.filter = "grayscale(100%)"; // เทา
+            } else if (heroteam1.includes(hero)) {
+                img.style.filter = "sepia(100%) hue-rotate(-50deg) saturate(300%) brightness(90%)"; // แดง
+            } else if (heroteam2.includes(hero)) {
+                img.style.filter = "sepia(100%) hue-rotate(190deg) saturate(300%) brightness(90%)"; // น้ำเงิน
+            }
+        }
+        wrapper.appendChild(img);
+        img.addEventListener("click", () => {
+            if (selectedElement) selectedElement.style.outline = "none";
+            selectedHero = hero;
+            selectedElement = img;
+            img.style.outline = "3px solid red";
+        });
+        gallery.appendChild(wrapper);
+    });
+}
 function updateBanList() {
   const currentGameWrapper = document.querySelector(`.game[data-index="${currentGameIndex}"]`);
   const banBoxes1 = currentGameWrapper.querySelectorAll(`.ban1:nth-child(2) .ban-choose`);
@@ -363,6 +365,7 @@ function updateBanList() {
 }
 let heroteam1 = [];
 let heroteam2 = [];
+let lastFilteredHero = null;
 function updateTeam() {
   const currentGameWrapper = document.querySelector(`.game[data-index="${currentGameIndex}"]`);
   const team1Boxes = currentGameWrapper.querySelectorAll("#team1-container .hero-choose img");
@@ -370,8 +373,13 @@ function updateTeam() {
   const newTeam1 = Array.from(team1Boxes).map(img => img.alt).filter(alt => alt);
   const newTeam2 = Array.from(team2Boxes).map(img => img.alt).filter(alt => alt);
 
-  heroteam1 = [...new Set([...heroteam1, ...newTeam1])];
-  heroteam2 = [...new Set([...heroteam2, ...newTeam2])];
+  heroteam1 = [...newTeam1];
+  heroteam2 = [...newTeam2];
+  if (lastFilteredHero) {
+  const gallery = currentGameWrapper.querySelector("#hero-gallery");
+  initGallery(heroDataList, gallery, false);
+  lastFilteredHero = null;
+}
 
   // ✅ เตรียม display ฝั่งซ้าย/ขวา
   const displayContainer = currentGameWrapper.querySelector(".display");
@@ -390,7 +398,6 @@ function updateTeam() {
   let team1CC = 0, team1Damage = 0, team1Dulability = 0, team1Time = 0;
   let typeCount = { "กายภาพ": 0, "เวท": 0, "จริง": 0 };
   let magicCount = 0;
-
   team1Boxes.forEach(img => {
     const hero = heroDataList.find(h => h.Hero === img.alt);
     if (hero) {
@@ -401,7 +408,7 @@ function updateTeam() {
       const type = hero["Damage Type"]?.trim().toLowerCase();
       if (type === "magic damage") {
         typeCount["เวท"]++;
-        magicCount++;
+        magicCount++; // <-- นับเฉพาะ team1
       } else if (type === "physical damage") {
         typeCount["กายภาพ"]++;
       } else if (type === "true damage") {
@@ -435,7 +442,7 @@ function updateTeam() {
       const type = hero["Damage Type"]?.trim().toLowerCase();
       if (type === "magic damage") {
         typeCount2["เวท"]++;
-        magicCount++;
+        // magicCount++;  // **ลบบรรทัดนี้ออก**
       } else if (type === "physical damage") {
         typeCount2["กายภาพ"]++;
       } else if (type === "true damage") {
@@ -467,8 +474,56 @@ setStatRow(displayContainer, `ดาเมจรวม: ${getDmgLabel(team1Damag
 setStatRow(displayContainer, `ความอึด: ${getDefLabel(team1Dulability)}`, `ความอึด: ${getDefLabel(team2Dulability)}`);
 setStatRow(displayContainer, `ประเภทดาเมจ: ${maxType}`, `ประเภทดาเมจ: ${team2MaxType}`);
 setStatRow(displayContainer, `เกมช่วง: ${getTimeLabel(team1Time)}`, `เกมช่วง: ${getTimeLabel(team2Time)}`);
-setStatRow(displayContainer, `ฮีโร่ทีม 1: ${heroteam1.join(", ")}`, `ฮีโร่ทีม 2: ${heroteam2.join(", ")}`);
+setStatRow(
+  displayContainer,
+  // ฝั่ง team 1 แสดงเป็นรูปเหมือนเดิม
+  `${heroteam1.map(hero => `<img src="./asset/hero/${hero}.webp" alt="${hero}" title="${hero}" style="width:32px;height:32px;vertical-align:middle;margin-right:4px;border:1px solid #888;border-radius:4px;cursor:pointer;" class="team1-hero-img">`).join("")}`,
+  // ฝั่ง team 2 แสดงเป็นรูปและเพิ่ม event คลิก
+  `${heroteam2.map(hero => `<img src="./asset/hero/${hero}.webp" alt="${hero}" title="${hero}" style="width:32px;height:32px;vertical-align:middle;margin-right:4px;border:1px solid #888;border-radius:4px;cursor:pointer;" class="team2-hero-img">`).join("")}`
+);
 
+// หลังจาก setStatRow แล้ว ให้เพิ่ม event ให้กับรูป team2
+setTimeout(() => {
+  const displayContainer = document.querySelector(`.game[data-index="${currentGameIndex}"] .display`);
+  const gallery = document.querySelector(`.game[data-index="${currentGameIndex}"] #hero-gallery`);
+  const imgs = displayContainer.querySelectorAll('.team1-hero-img, .team2-hero-img');
+
+  imgs.forEach(img => {
+    img.addEventListener('click', () => {
+      const heroName = img.alt;
+      // toggle filter: ถ้ากดซ้ำที่ตัวเดิม ให้ยกเลิก filter
+      if (lastFilteredHero === heroName) {
+        initGallery(heroDataList, gallery, false);
+        lastFilteredHero = null;
+        return;
+      }
+      lastFilteredHero = heroName;
+
+      // หา heroObj ใน heroDataList (ถ้าไม่มีจะเป็น Soul_Scroll/Sight)
+      const heroObj = heroDataList.find(h => h.Hero === heroName);
+      let weaknessList = [];
+      if (heroObj && heroObj.Weakness) {
+        weaknessList = heroObj.Weakness.split(/[,/ ]/).map(s => s.trim()).filter(Boolean);
+      }
+      // เพิ่ม Soul_Scroll และ Sight ถ้ามีใน weaknessList
+      const result = [];
+      if (weaknessList.includes("Soul_Scroll")) {
+        result.push({ Hero: "Soul_Scroll" });
+      }
+      if (weaknessList.includes("Sight")) {
+        result.push({ Hero: "Sight" });
+      }
+      // filter hero ที่มีใน weaknessList (ยกเว้น Soul_Scroll/Sight)
+      let filtered = heroDataList.filter(h => weaknessList.includes(h.Hero));
+      // เรียง a-z
+      filtered.sort((a, b) => a.Hero.localeCompare(b.Hero));
+      // รวม Soul_Scroll, Sight ไว้ข้างหน้า
+      const finalResult = [...result, ...filtered];
+      // ถ้าไม่มี result ให้โชว์ว่าง
+      initGallery(finalResult.length ? finalResult : [], gallery, false);
+    });
+  });
+}, 0);
 
 // ❗️ต้องมาก่อนคำเตือนพิเศษ
 if (warnings.length > 0) {
@@ -532,16 +587,34 @@ function setStatRow(displayEl, team1Text, team2Text) {
 
   const p1 = document.createElement("p");
   p1.className = "ban-list";
-  p1.textContent = team1Text;
+  if (team1Text.includes("<img")) {
+    p1.innerHTML = team1Text;
+  } else {
+    p1.textContent = team1Text;
+  }
 
   const p2 = document.createElement("p");
   p2.className = "ban-list";
-  p2.textContent = team2Text;
+  if (team2Text.includes("<img")) {
+    p2.innerHTML = team2Text;
+  } else {
+    p2.textContent = team2Text;
+  }
 
   row.appendChild(p1);
   row.appendChild(p2);
   displayEl.appendChild(row);
 }
+
+// เพิ่ม selection bar ถ้ายังไม่มี
+if (!document.querySelector('.tab-bar .selection')) {
+    const selection = document.createElement('span');
+    selection.className = 'selection';
+    document.querySelector('.tab-bar').appendChild(selection);
+}
+
+// เรียกครั้งแรกหลัง DOMContentLoaded
+setTimeout(updateTabSelectionBar, 0);
 
 initGallery(heroDataList); 
 });
