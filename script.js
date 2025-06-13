@@ -36,12 +36,6 @@ function createGameContent(index) {
                 <div class="ban-choose" id="Ban1"></div>
                 <div class="ban-choose" id="Ban1"></div>
             </div>
-            <div class="ban2">
-                <div class="ban-choose" id="Ban2"></div>
-                <div class="ban-choose" id="Ban2"></div>
-                <div class="ban-choose" id="Ban2"></div>
-                <div class="ban-choose" id="Ban2"></div>
-            </div>
             <div class="team-section">
             <div class="team-label2">Team 2</div>
             <div id="team2-container">
@@ -51,6 +45,12 @@ function createGameContent(index) {
             <div class="hero-choose" id="Jungle2"><img src="/asset/etc/Jungle.webp" data-default="/asset/etc/Jungle.webp"></div>
             <div class="hero-choose" id="DarkSlayer2"><img src="/asset/etc/DarkSlayer.webp" data-default="/asset/etc/DarkSlayer.webp"></div>
             </div>
+            </div>
+            <div class="ban2">
+                <div class="ban-choose" id="Ban2"></div>
+                <div class="ban-choose" id="Ban2"></div>
+                <div class="ban-choose" id="Ban2"></div>
+                <div class="ban-choose" id="Ban2"></div>
             </div>
         </div>
         <div class="content" id="content-${index}">
@@ -77,7 +77,7 @@ function createGameContent(index) {
                 <button data-type="tierS">S</button>
                 <button data-type="tierA">A</button>
             </div>
-            <input type="text" id="hero-search-${index}" placeholder="ค้นหาชื่อฮีโร่..." style="margin-bottom:10px;width:180px;">
+            <input type="text" id="hero-search-${index}" placeholder="ค้นหาชื่อฮีโร่..." style="margin-bottom:10px;width:100%;max-width:300px;">
             <div id="hero-gallery" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
         </div>
   `;
